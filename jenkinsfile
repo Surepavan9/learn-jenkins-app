@@ -5,7 +5,7 @@ pipeline {
         stage('Build') {
             agent {
                 docker {
-                    image 'node:20-alpine'
+                    image 'node:20'
                     reuseNode true
                 }
             }
@@ -14,9 +14,29 @@ pipeline {
                     ls -la
                     node --version
                     npm --version
-                    npm install
+                    npm ci
                     npm run build
                     ls -la
+                '''
+            }
+        }
+        stage('Test') {
+            agent {
+                docker {
+                    image 'node:20'
+                    reuseNode true
+                }
+            }
+            steps {
+                sh '''
+                    # Test if build directory exists
+                    test -d build && echo "Build directory exists" || exit 1
+                    
+                    # Test if index.html is present in build
+                    test -f build/index.html && echo "index.html exists" || exit 1
+
+                    # Run npm tests
+                    npm test -- --watchAll=false
                 '''
             }
         }
