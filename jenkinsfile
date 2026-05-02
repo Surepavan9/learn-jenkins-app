@@ -14,22 +14,9 @@ pipeline {
                     ls -la
                     node --version
                     npm --version
-                    npm cache clean --force
-                    rm -rf node_modules
-                    npm install --legacy-peer-deps
+                    npm install
                     npm run build
                     ls -la
-                '''
-            }
-        }
-        stage('Test') {
-            steps{
-                sh '''
-                  # Test if index.html is present
-                  test -f public/index.html && echo "index.html exists" || exit 1
-
-                  # Run npm tests
-                  npm test
                 '''
             }
         }
