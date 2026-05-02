@@ -15,10 +15,10 @@ pipeline {
                     node --version
                     npm --version
                     
-                    # Disable SSL verification for npm
-                    npm config set strict-ssl false
+                    # Skip npm ci and use existing node_modules
+                    # npm config set strict-ssl false
+                    # npm ci
                     
-                    npm ci
                     npm run build
                     ls -la
                 '''
@@ -33,9 +33,6 @@ pipeline {
             }
             steps {
                 sh '''
-                    # Disable SSL verification for npm
-                    npm config set strict-ssl false
-                    
                     # Test if build directory exists
                     test -d build && echo "Build directory exists" || exit 1
                     
