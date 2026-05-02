@@ -22,5 +22,16 @@ pipeline {
                 '''
             }
         }
+        stage('Test') {
+            steps{
+                sh '''
+                  # Test if index.html is present
+                  test -f public/index.html && echo "index.html exists" || exit 1
+
+                  # Run npm tests
+                  npm test
+                '''
+            }
+        }
     }
 }
