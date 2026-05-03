@@ -24,6 +24,7 @@ pipeline {
                 '''
             }
         }
+
         stage('Test') {
             agent {
                 docker {
@@ -34,21 +35,57 @@ pipeline {
             steps {
                 sh '''
                     # Test if build directory exists
-                    test -d build && echo "Build directory exists" || exit 1
+                    test -f build/index.html
                     
-                    # Test if index.html is present in build
-                    test -f build/index.html && echo "index.html exists" || exit 1
-
                     # Run npm tests
                     npm test -- --watchAll=false
                 '''
             }
         }
+
+        stage('E2E') {
+            agent {
+                docker {
+                    image 'mcr.microsoft.com/playwright:v1.39.0-jammy'
+                    reuseNode true
+                }
+            }
+            steps {
+                sh '''
+                    # Install serve locally
+                    npm install serve
+                    
+                    # Start server in background
+                    node_modules/.bin/serve -s build &
+                    
+                    # Wait for server to start
+                    sleep 10
+                    
+                    # Run Playwright E2E tests
+                    npx playwright test --reporter=html
+                '''
+            }
+        }
     }
-    
+
     post {
         always {
-            junit 'test-results/junit.xml'
+            echo 'Pipeline completed!'
+            publishHTML([
+                allowMissing: false,
+                alwaysLinkToLastBuild: false,
+                keepAll: true,
+                reportDir: 'playwright-report',
+                reportFiles: 'index.html',
+                reportName: 'Playwright HTML Report',
+                reportTitles: 'E2E Test Report'
+            ])
+        }
+        success {
+            echo 'All stages passed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed!'
         }
     }
 }
