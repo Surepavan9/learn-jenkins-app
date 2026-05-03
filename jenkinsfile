@@ -15,9 +15,8 @@ pipeline {
                     node --version
                     npm --version
                     
-                    # Skip npm ci and use existing node_modules
-                    # npm config set strict-ssl false
-                    # npm ci
+                    # Extract node_modules from tarball
+                    tar -xzf node_modules.tar.gz
                     
                     npm run build
                     ls -la
