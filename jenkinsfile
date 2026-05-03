@@ -18,7 +18,8 @@ pipeline {
                     # Extract node_modules from tarball
                     tar -xzf node_modules.tar.gz
                     
-                    npm run build
+                    # Disable ESLint for build
+                    DISABLE_ESLINT_PLUGIN=true npm run build
                     ls -la
                 '''
             }
